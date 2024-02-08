@@ -12,8 +12,7 @@ type Kafka struct {
 	producer    *kafka.Producer
 	consumerMap map[string]*kafka.Consumer
 
-	topicMap     map[string]string
-	removedTopic map[string]error
+	topicMap map[string]string
 }
 
 type KafkaImpl interface {
@@ -30,9 +29,8 @@ func NewKafka(url, clientId string) (KafkaImpl, error) {
 	}
 
 	k := Kafka{
-		topicMap:     make(map[string]string),
-		consumerMap:  make(map[string]*kafka.Consumer),
-		removedTopic: make(map[string]error),
+		topicMap:    make(map[string]string),
+		consumerMap: make(map[string]*kafka.Consumer),
 	}
 	var err error
 
