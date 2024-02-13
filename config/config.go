@@ -6,6 +6,17 @@ type Config struct {
 		ClientId string
 	}
 
+	Elastic struct {
+		URI      string
+		User     string
+		Password string
+	}
+
+	DB struct {
+		URI string
+		DB  string
+	}
+
 	Server struct {
 		Port string
 	}

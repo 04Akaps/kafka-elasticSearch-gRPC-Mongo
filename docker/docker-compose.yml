@@ -26,3 +26,17 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  elasticsearch:
+    container_name: elasticsearch-docker
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    depends_on:
+      - kafka
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_USERNAME=akaps
+      - ELASTIC_PASSWORD=004
+    restart: always
