@@ -1,5 +1,10 @@
 package config
 
+import (
+	"github.com/pelletier/go-toml/v2"
+	"os"
+)
+
 type Config struct {
 	Kafka struct {
 		URI      string
@@ -25,5 +30,14 @@ type Config struct {
 func NewConfig(path string) *Config {
 	c := new(Config)
 
-	return c
+	if file, err := os.Open(path); err != nil {
+		panic(err)
+	} else {
+		defer file.Close()
+		if err = toml.NewDecoder(file).Decode(c); err != nil {
+			panic(err)
+		} else {
+			return c
+		}
+	}
 }

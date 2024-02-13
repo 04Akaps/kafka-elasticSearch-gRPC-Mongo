@@ -7,11 +7,11 @@ import (
 	"github.com/04Akaps/kafka-go/server/app"
 )
 
-var confFlag = flag.String("config", "./config.toml", "toml file not found")
+var confFlag = flag.String("config", "./config.toml", "configuration toml file path")
 
 func main() {
 	flag.Parsed()
-	docker.DockerInit()
 	cfg := config.NewConfig(*confFlag)
+	docker.DockerInit()
 	app.NewApp(cfg)
 }
