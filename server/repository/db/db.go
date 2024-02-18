@@ -14,11 +14,13 @@ type DB struct {
 	client *mongo.Client
 	db     *mongo.Database
 
-	block *mongo.Collection
-	tx    *mongo.Collection
+	like        *mongo.Collection
+	likeHistory *mongo.Collection
 }
 
 type DBImpl interface {
+	Like(toUser string, point int64) error
+	UnLike(toUser string, point int64) error
 }
 
 func NewDB(config *config.Config) (DBImpl, error) {
@@ -33,7 +35,9 @@ func NewDB(config *config.Config) (DBImpl, error) {
 		return nil, err
 	} else {
 		d.db = d.client.Database(config.DB.DB)
-		// TODO Collection
+
+		d.like = d.db.Collection("like")
+		d.likeHistory = d.db.Collection("like-history")
 
 		log.Println("Success To Connect DB")
 		return d, nil

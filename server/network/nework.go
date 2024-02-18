@@ -29,7 +29,7 @@ func NewNetwork(config *config.Config, service service.ServiceImpl, auth *auth.R
 	n.setCors()
 
 	newLogin(n)
-	newLike(n)
+	newLike(n, n.service)
 
 	return n
 }
