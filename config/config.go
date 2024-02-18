@@ -22,6 +22,12 @@ type Config struct {
 		DB  string
 	}
 
+	Auth struct {
+		ServerURL string
+		ClientURL string
+		PasetoKey string
+	}
+
 	Server struct {
 		Port string
 	}

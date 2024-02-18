@@ -12,6 +12,8 @@ type Service struct {
 }
 
 type ServiceImpl interface {
+	Like(fromUser, toUser string) error
+	UnLike(fromUser, toUser string) error
 }
 
 func NewService(config *config.Config, repository *repository.Repository) ServiceImpl {
@@ -21,4 +23,13 @@ func NewService(config *config.Config, repository *repository.Repository) Servic
 	}
 
 	return s
+}
+
+func (s *Service) Like(fromUser, toUser string) error {
+
+	return nil
+}
+
+func (s *Service) UnLike(fromUser, toUser string) error {
+	return nil
 }
