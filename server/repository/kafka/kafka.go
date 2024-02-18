@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/04Akaps/kafka-go/config"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 )
@@ -12,7 +14,7 @@ type Kafka struct {
 	producer    *kafka.Producer
 	consumerMap map[string]*kafka.Consumer
 
-	topicMap map[string]string
+	topicMap map[string]bool
 }
 
 type KafkaImpl interface {
@@ -21,15 +23,15 @@ type KafkaImpl interface {
 	AddNewConsumer(topic string, conf *kafka.ConfigMap) error
 }
 
-func NewKafka(url, clientId string) (KafkaImpl, error) {
+func NewKafka(config *config.Config) (KafkaImpl, error) {
 	producerConf := &kafka.ConfigMap{
-		"bootstrap.servers": url,
-		"client.id":         clientId,
+		"bootstrap.servers": config.Kafka.URI,
+		"client.id":         config.Kafka.ClientId,
 		"acks":              "all",
 	}
 
 	k := Kafka{
-		topicMap:    make(map[string]string),
+		topicMap:    make(map[string]bool),
 		consumerMap: make(map[string]*kafka.Consumer),
 	}
 	var err error
@@ -37,19 +39,32 @@ func NewKafka(url, clientId string) (KafkaImpl, error) {
 	if k.producer, err = kafka.NewProducer(producerConf); err != nil {
 		return nil, err
 	} else {
+
+		for _, topic := range config.Kafka.Topics {
+			k.topicMap[topic] = true
+
+			consumerConf := &kafka.ConfigMap{
+				"bootstrap.servers": config.Kafka.URI,
+				"group.id":          "consumer_group_3",
+				"auto.offset.reset": "latest",
+				// "go.application.rebalance.enable": true,
+				"enable.auto.commit": false,
+				// "partition.assignment.strategy": "roundrobin",
+			}
+
+			k.AddNewConsumer(topic, consumerConf)
+		}
+
 		return &k, nil
 	}
 }
 
 func (k *Kafka) SendEvent(topic string, value []byte, ch chan kafka.Event) (kafka.Event, error) {
-	// TODO
-	// 추가된 토픽 없이 생성이 된다면, 어떻게 처리되는지 테스트 필요
-	// 테스트 이후 에러 케이스로 추가
-	//if _, ok := k.topicMap[topic]; !ok {
-	//	return nil, errors.New("Topic is Not Added")
-	//}
-
-	if err := k.producer.Produce(&kafka.Message{
+	// 토픽이 생성이 되어 있지 않으면, 이벤트를 subscribe 할 수 없으니.
+	// 토픽 체크
+	if _, ok := k.topicMap[topic]; !ok {
+		return nil, errors.New("Topic is Not Added")
+	} else if err := k.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &topic,
 			Partition: kafka.PartitionAny,
@@ -123,6 +138,8 @@ func (k *Kafka) subscribeEvent(topic string, consumer *kafka.Consumer) error {
 				if err := json.Unmarshal(event.Value, &consumeValue); err != nil {
 					log.Println("Failed To Decode", err.Error())
 				} else {
+
+					fmt.Println("여기 들어왔니??", consumeValue)
 
 					// TODO Commit Message
 				}

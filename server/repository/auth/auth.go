@@ -13,7 +13,7 @@ func NewRpcAuth(config *config.Config) (*RPCAuth, error) {
 	a := new(RPCAuth)
 	var err error
 
-	if a.Auth, err = auth.NewAuth(config.Auth.ServerURL, config.Auth.ClientURL, config.Auth.PasetoKey); err != nil {
+	if a.Auth, err = auth.NewAuth(config.Auth.ClientURL, config.Auth.ClientURL, config.Auth.PasetoKey, false); err != nil {
 		return nil, err
 	} else {
 		return a, nil

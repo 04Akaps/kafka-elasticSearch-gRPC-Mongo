@@ -9,6 +9,7 @@ type Config struct {
 	Kafka struct {
 		URI      string
 		ClientId string
+		Topics   []string
 	}
 
 	Elastic struct {
@@ -23,7 +24,6 @@ type Config struct {
 	}
 
 	Auth struct {
-		ServerURL string
 		ClientURL string
 		PasetoKey string
 	}

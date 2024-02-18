@@ -11,6 +11,8 @@ import (
 
 const likeTopic = "like-topic"
 
+var topics map[string]string
+
 type Service struct {
 	config *config.Config
 
@@ -77,7 +79,7 @@ func (s *Service) sendLikeEventToKafka(fromUser, toUser string, point int64) {
 		if result, err := s.repository.Kafka.SendEvent(likeTopic, value, ch); err != nil {
 			log.Println("Failed To Send Event")
 		} else {
-			log.Println(result.String())
+			log.Println("Success to send to kafka", result.String())
 		}
 	}
 }

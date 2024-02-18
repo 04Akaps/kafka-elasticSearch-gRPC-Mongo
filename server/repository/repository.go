@@ -19,7 +19,7 @@ func NewRepository(config *config.Config) (*Repository, error) {
 	r := &Repository{config: config}
 	var err error
 
-	if r.Kafka, err = kafka.NewKafka(config.Kafka.URI, config.Kafka.ClientId); err != nil {
+	if r.Kafka, err = kafka.NewKafka(config); err != nil {
 		panic(err)
 	} else if r.DB, err = db.NewDB(config); err != nil {
 		panic(err)

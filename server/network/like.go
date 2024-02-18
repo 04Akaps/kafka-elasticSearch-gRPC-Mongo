@@ -33,9 +33,7 @@ func (l *like) like(c *gin.Context) {
 
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response(c, http.StatusUnprocessableEntity, nil, err.Error())
-	} else if user, err := l.network.getUserByToken(c); err != nil {
-		response(c, http.StatusUnprocessableEntity, nil, err.Error())
-	} else if err = l.service.UnLike(user, req.ToUser, req.Point); err != nil {
+	} else if err = l.service.Like(req.FromUser, req.ToUser, req.Point); err != nil {
 		response(c, http.StatusInternalServerError, nil, err.Error())
 	} else {
 		response(c, http.StatusOK, nil, "")
@@ -48,9 +46,7 @@ func (l *like) unLike(c *gin.Context) {
 
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response(c, http.StatusUnprocessableEntity, nil, err.Error())
-	} else if user, err := l.network.getUserByToken(c); err != nil {
-		response(c, http.StatusUnprocessableEntity, nil, err.Error())
-	} else if err = l.service.UnLike(user, req.ToUser, req.Point); err != nil {
+	} else if err = l.service.UnLike(req.FromUser, req.ToUser, req.Point); err != nil {
 		response(c, http.StatusInternalServerError, nil, err.Error())
 	} else {
 		response(c, http.StatusOK, nil, "")
