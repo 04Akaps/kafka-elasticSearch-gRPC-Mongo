@@ -66,16 +66,20 @@ func (s *Service) sendLikeEventToKafka(fromUser, toUser string, point int64) {
 		action = "plus"
 	}
 
-	history := types.LikeHistory{
-		FromUser:   fromUser,
-		ToUser:     toUser,
-		Point:      point,
-		Action:     action,
-		SearchText: strings.Join([]string{fromUser, toUser, action}, " "),
-		Time:       time.Now().Unix(),
+	event := types.KafkaEvent{
+		// TODO ElasticID를 어떻게 설정해야 할지..
+		ElasticId: "test",
+		Data: types.LikeHistory{
+			FromUser:   fromUser,
+			ToUser:     toUser,
+			Point:      point,
+			Action:     action,
+			SearchText: strings.Join([]string{fromUser, toUser, action}, " "),
+			Time:       time.Now().Unix(),
+		},
 	}
 
-	if value, err := json.Marshal(history); err != nil {
+	if value, err := json.Marshal(event); err != nil {
 		log.Println("Failed To Marshal Like History")
 	} else {
 		ch := make(chan kafka.Event)

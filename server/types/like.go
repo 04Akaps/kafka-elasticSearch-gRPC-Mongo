@@ -1,5 +1,10 @@
 package types
 
+type KafkaEvent struct {
+	ElasticId string      `json:"elasticId"`
+	Data      LikeHistory `json:"data"`
+}
+
 type LikeHistory struct {
 	FromUser   string `json:"fromUser"`
 	ToUser     string `json:"toUser"`
