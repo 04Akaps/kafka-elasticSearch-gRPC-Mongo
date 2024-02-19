@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/04Akaps/kafka-go/config"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
@@ -13,6 +12,8 @@ import (
 type Kafka struct {
 	producer    *kafka.Producer
 	consumerMap map[string]*kafka.Consumer
+
+	elasticLog chan<- interface{}
 
 	topicMap map[string]bool
 }
@@ -23,7 +24,7 @@ type KafkaImpl interface {
 	AddNewConsumer(topic string, conf *kafka.ConfigMap) error
 }
 
-func NewKafka(config *config.Config) (KafkaImpl, error) {
+func NewKafka(config *config.Config, elasticLog chan interface{}) (KafkaImpl, error) {
 	producerConf := &kafka.ConfigMap{
 		"bootstrap.servers": config.Kafka.URI,
 		"client.id":         config.Kafka.ClientId,
@@ -33,6 +34,7 @@ func NewKafka(config *config.Config) (KafkaImpl, error) {
 	k := Kafka{
 		topicMap:    make(map[string]bool),
 		consumerMap: make(map[string]*kafka.Consumer),
+		elasticLog:  elasticLog,
 	}
 	var err error
 
@@ -138,10 +140,10 @@ func (k *Kafka) subscribeEvent(topic string, consumer *kafka.Consumer) error {
 				if err := json.Unmarshal(event.Value, &consumeValue); err != nil {
 					log.Println("Failed To Decode", err.Error())
 				} else {
-
-					fmt.Println("여기 들어왔니??", consumeValue)
-
-					// TODO Commit Message
+					k.elasticLog <- consumeValue
+					if partion, err := k.consumerMap[topic].CommitMessage(event); err != nil {
+						log.Println(partion)
+					}
 				}
 
 			case *kafka.Error:

@@ -7,20 +7,21 @@ import (
 )
 
 type Elastic struct {
-	config *config.Config
+	config     *config.Config
+	elasticLog chan interface{}
 
-	Client *elastic.Client
+	client *elastic.Client
 }
 
 type ElasticImpl interface {
 }
 
-func NewElastic(cfg *config.Config) (ElasticImpl, error) {
-	e := &Elastic{config: cfg}
+func NewElastic(cfg *config.Config, elasticLog chan interface{}) (ElasticImpl, error) {
+	e := &Elastic{config: cfg, elasticLog: elasticLog}
 
 	var err error
 
-	if e.Client, err = elastic.NewClient(
+	if e.client, err = elastic.NewClient(
 		elastic.SetBasicAuth(
 			cfg.Elastic.User,
 			cfg.Elastic.Password,

@@ -7,6 +7,8 @@ import (
 	"github.com/04Akaps/kafka-go/server/types"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
+	"strings"
+	"time"
 )
 
 const likeTopic = "like-topic"
@@ -65,10 +67,12 @@ func (s *Service) sendLikeEventToKafka(fromUser, toUser string, point int64) {
 	}
 
 	history := types.LikeHistory{
-		FromUser: fromUser,
-		ToUser:   toUser,
-		Point:    point,
-		Action:   action,
+		FromUser:   fromUser,
+		ToUser:     toUser,
+		Point:      point,
+		Action:     action,
+		SearchText: strings.Join([]string{fromUser, toUser, action}, " "),
+		Time:       time.Now().Unix(),
 	}
 
 	if value, err := json.Marshal(history); err != nil {
