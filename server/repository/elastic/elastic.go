@@ -12,7 +12,7 @@ import (
 
 type Elastic struct {
 	config     *config.Config
-	elasticLog chan interface{}
+	elasticLog <-chan interface{}
 
 	client *elastic.Client
 }
@@ -20,7 +20,7 @@ type Elastic struct {
 type ElasticImpl interface {
 }
 
-func NewElastic(cfg *config.Config, elasticLog chan interface{}) (ElasticImpl, error) {
+func NewElastic(cfg *config.Config, elasticLog <-chan interface{}) (ElasticImpl, error) {
 	e := &Elastic{config: cfg, elasticLog: elasticLog}
 
 	var err error
@@ -35,25 +35,42 @@ func NewElastic(cfg *config.Config, elasticLog chan interface{}) (ElasticImpl, e
 	); err != nil {
 		return nil, err
 	} else {
+		go e.subscribeLog()
 
 		log.Println("Success To Connect Elastic Search")
 		return e, nil
 	}
 }
 
-func (e *Elastic) CreateData(index string, data interface{}) {
-	if d, ok := data.(types.KafkaEvent); ok {
+func (e *Elastic) subscribeLog() {
+	for {
+		select {
+		case data := <-e.elasticLog:
+			if event, ok := data.(types.KafkaEvent); ok {
+				if err := checkIndexExisted(e.client, event.Index); err == nil {
+					// TODO Queue로 관리하여, 순차적인 처리를 보장하도록
+					e.createData(event.Index, event.Data, 0)
+				}
+			}
+		}
+	}
+}
+
+func (e *Elastic) createData(index string, data interface{}, retryCount int64) {
+
+	if retryCount > 3 {
+		log.Println("Reached maximum retry limit, giving up.", index, data)
+		return
+	} else if d, ok := data.(types.KafkaEvent); ok {
 		client := e.client
 		if err := checkIndexExisted(client, index); err != nil {
 			log.Println("Failed To Create Index Try Again")
-			e.CreateData(index, data)
+			e.createData(index, data, retryCount+1)
 		} else if _, err = client.Index().Index(index).Id(d.ElasticId).BodyJson(d.Data).Do(util.Context()); err != nil {
 			log.Println("Failed To Create New Elastic Data")
 		} else {
 			log.Println("Success To Create New Elastic Data")
 		}
-	} else {
-
 	}
 }
 

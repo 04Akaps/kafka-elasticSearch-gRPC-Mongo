@@ -1,6 +1,7 @@
 package types
 
 type KafkaEvent struct {
+	Index     string      `json:"index"`
 	ElasticId string      `json:"elasticId"`
 	Data      LikeHistory `json:"data"`
 }

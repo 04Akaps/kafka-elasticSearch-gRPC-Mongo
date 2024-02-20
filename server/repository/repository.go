@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"github.com/04Akaps/kafka-go/config"
 	"github.com/04Akaps/kafka-go/server/repository/db"
 	"github.com/04Akaps/kafka-go/server/repository/elastic"
@@ -29,13 +28,6 @@ func NewRepository(config *config.Config) (*Repository, error) {
 	} else if r.Elastic, err = elastic.NewElastic(config, elasticLog); err != nil {
 		panic(err)
 	} else {
-
-		go func() {
-			for {
-				test := <-elasticLog
-				fmt.Println("testset", test)
-			}
-		}()
 		return r, nil
 	}
 }

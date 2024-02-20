@@ -6,6 +6,7 @@ import (
 	"github.com/04Akaps/kafka-go/server/repository"
 	"github.com/04Akaps/kafka-go/server/types"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/google/uuid"
 	"log"
 	"strings"
 	"time"
@@ -67,8 +68,8 @@ func (s *Service) sendLikeEventToKafka(fromUser, toUser string, point int64) {
 	}
 
 	event := types.KafkaEvent{
-		// TODO ElasticID를 어떻게 설정해야 할지..
-		ElasticId: "test",
+		Index:     likeTopic,
+		ElasticId: uuid.New().String(),
 		Data: types.LikeHistory{
 			FromUser:   fromUser,
 			ToUser:     toUser,

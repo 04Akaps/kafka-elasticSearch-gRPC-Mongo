@@ -11,7 +11,7 @@ var confFlag = flag.String("config", "./config.toml", "configuration toml file p
 var dockerInit = flag.Bool("init", false, "docker init set")
 
 func main() {
-	flag.Parsed()
+	flag.Parse()
 	cfg := config.NewConfig(*confFlag)
 	if *dockerInit {
 		docker.DockerInit()
