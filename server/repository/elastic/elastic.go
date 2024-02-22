@@ -1,6 +1,7 @@
 package elastic
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/04Akaps/kafka-go/config"
@@ -45,19 +46,25 @@ func NewElastic(cfg *config.Config, elasticLog <-chan interface{}) (ElasticImpl,
 func (e *Elastic) subscribeLog() {
 	for {
 		select {
-		case data := <-e.elasticLog:
-			if event, ok := data.(types.KafkaEvent); ok {
-				if err := checkIndexExisted(e.client, event.Index); err == nil {
-					// TODO Queue로 관리하여, 순차적인 처리를 보장하도록
-					e.createData(event.Index, event.Data, 0)
+		case event := <-e.elasticLog:
+
+			var decode types.KafkaEvent
+
+			if b, err := json.Marshal(event); err != nil {
+				log.Println("Failed To Marshal", err.Error())
+			} else if err = json.Unmarshal(b, &decode); err != nil {
+				log.Println("Failed To UnMarshal", err.Error())
+			} else {
+				if err = checkIndexExisted(e.client, decode.Index); err == nil {
+					go e.createData(decode.Index, decode, 0)
 				}
 			}
+
 		}
 	}
 }
 
 func (e *Elastic) createData(index string, data interface{}, retryCount int64) {
-
 	if retryCount > 3 {
 		log.Println("Reached maximum retry limit, giving up.", index, data)
 		return

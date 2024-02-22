@@ -141,7 +141,9 @@ func (k *Kafka) subscribeEvent(topic string, consumer *kafka.Consumer) error {
 					log.Println("Failed To Decode", err.Error())
 				} else {
 					log.Println("Success To Subscribe Kafka Event")
+
 					k.elasticLog <- consumeValue
+
 					if partion, err := k.consumerMap[topic].CommitMessage(event); err != nil {
 						log.Println(partion)
 					}
