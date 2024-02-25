@@ -25,3 +25,12 @@ func NewRes(result int, res interface{}, data ...string) *response {
 		Result: res,
 	}
 }
+
+type Sort struct {
+	Field string `form:"field" json:"field"`
+}
+
+type Paging struct {
+	Page     int64 `form:"page" json:"page"`
+	PageSize int64 `form:"pageSize" json:"pageSize"`
+}

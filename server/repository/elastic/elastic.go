@@ -19,6 +19,7 @@ type Elastic struct {
 }
 
 type ElasticImpl interface {
+	SearchData(index string, query elastic.Query, sort types.Sort, paging types.Paging) ([]interface{}, error)
 }
 
 func NewElastic(cfg *config.Config, elasticLog <-chan interface{}) (ElasticImpl, error) {
@@ -40,6 +41,44 @@ func NewElastic(cfg *config.Config, elasticLog <-chan interface{}) (ElasticImpl,
 
 		log.Println("Success To Connect Elastic Search")
 		return e, nil
+	}
+}
+
+func (e *Elastic) SearchData(index string, query elastic.Query, sort types.Sort, paging types.Paging) ([]interface{}, error) {
+	client := e.client
+
+	baseQuery := client.Search(index).Query(query)
+
+	if sort.Field != "" {
+		// default asc
+		baseQuery.Sort(sort.Field, true)
+	}
+
+	if paging.PageSize != 0 {
+		baseQuery.From(int(paging.Page))
+		baseQuery.Size(int(paging.PageSize))
+	}
+
+	baseQuery.Pretty(true)
+
+	if err := checkIndexExisted(client, index); err != nil {
+		return nil, err
+	} else if result, err := baseQuery.Do(util.Context()); err != nil {
+		return nil, err
+	} else {
+		var res []interface{}
+
+		for _, hit := range result.Hits.Hits {
+			var model interface{}
+
+			if err := json.Unmarshal(hit.Source, &model); err != nil {
+				return nil, err
+			} else {
+				res = append(res, model)
+			}
+		}
+
+		return res, nil
 	}
 }
 

@@ -26,6 +26,7 @@ func newLike(n *Network, service service.ServiceImpl) {
 
 	n.register(basePath+"/like-request", GET, n.verifyLogin(), l.like)
 	n.register(basePath+"/unLike-request", GET, n.verifyLogin(), l.unLike)
+	n.register(basePath+"/search", GET, l.searchLikeHistory)
 }
 
 func (l *like) like(c *gin.Context) {
@@ -52,4 +53,16 @@ func (l *like) unLike(c *gin.Context) {
 		response(c, http.StatusOK, nil, "")
 	}
 
+}
+
+func (l *like) searchLikeHistory(c *gin.Context) {
+	var req types.LikeHistoryRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		response(c, http.StatusUnprocessableEntity, nil, err.Error())
+	} else if res, err := l.service.SearchLikeHistory(req); err != nil {
+		response(c, http.StatusInternalServerError, nil, err.Error())
+	} else {
+		response(c, http.StatusOK, res, "")
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/04Akaps/kafka-go/server/types"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/google/uuid"
+	"github.com/olivere/elastic/v7"
 	"log"
 	"strings"
 	"time"
@@ -25,6 +26,7 @@ type Service struct {
 type ServiceImpl interface {
 	Like(fromUser, toUser string, point int64) error
 	UnLike(fromUser, toUser string, point int64) error
+	SearchLikeHistory(req types.LikeHistoryRequest) ([]*types.LikeHistory, error)
 }
 
 func NewService(config *config.Config, repository *repository.Repository) ServiceImpl {
@@ -54,6 +56,27 @@ func (s *Service) UnLike(fromUser, toUser string, point int64) error {
 		go s.sendLikeEventToKafka(fromUser, toUser, point)
 		return nil
 	}
+}
+
+func (s *Service) SearchLikeHistory(req types.LikeHistoryRequest) ([]*types.LikeHistory, error) {
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewMatchQuery("searchText", req.Search))
+
+	if result, err := s.repository.Elastic.SearchData(likeTopic, query, req.Sort, req.Paging); err != nil {
+		log.Println("Failed To Get Search Data", "Err", err)
+		return nil, err
+	} else {
+		var res []*types.LikeHistory
+
+		if b, err := json.Marshal(&result); err != nil {
+			return nil, err
+		} else if err = json.Unmarshal(b, &res); err != nil {
+			return nil, err
+		} else {
+			return res, nil
+		}
+	}
+
 }
 
 func (s *Service) sendLikeEventToKafka(fromUser, toUser string, point int64) {

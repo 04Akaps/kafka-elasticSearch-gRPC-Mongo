@@ -15,3 +15,9 @@ type UnLikeRequest struct {
 	ToUser   string `form:"toUser" binding:"required"`
 	Point    int64  `form:"point" binding:"required"`
 }
+
+type LikeHistoryRequest struct {
+	Paging
+	Sort
+	Search string `form:"search" binding:"required"`
+}
