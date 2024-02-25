@@ -101,7 +101,7 @@ docker.elastic.co/elasticsearch/elasticsearch:7.14.0
 
 간단하게 `draw.io` 를 통해서 그림으로만 다루어 보겠다.
 
-![스크린샷 2024-02-25 오전 11.50.47.png](..%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-02-25%20%EC%98%A4%EC%A0%84%2011.50.47.png)
+<img width="545" alt="스크린샷 2024-02-25 오전 11 50 47" src="https://github.com/04Akaps/kafka-go/assets/83758624/cce12e38-ade8-41a1-82ce-c341b8ca1d71">
 
 일반 검색 쿼리를 요청을 하는 경우에는 유저에 대한 `Verify`가 필요가 없다.
 하지만 이외의 요청에 대해서는 사실 유저 `Verify`가  필요가 없기 떄문에, 따로 검증을 진행을 하지 않고, `ElasticSearch`에 바로 요청을 하게 된다.
